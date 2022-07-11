@@ -4,7 +4,7 @@ import { Button, Col, Row, Alert, Select } from "antd";
 import { Route, Switch } from "react-router-dom";
 import "./App.css";
 import { Contract } from "./components";
-import { Home, Hints, Subgraph, CreateTransaction, Transactions } from "./views";
+import { Home, Hints, Subgraph, CreateTransaction, Transactions, Jbprojects } from "./views";
 
 /**----------------------
  * TODO:we can create a global context state and fetch all this props on individual components
@@ -108,6 +108,20 @@ const Routes = ({
             readContracts={readContracts}
             blockExplorer={blockExplorer}
             nonce={nonce}
+            signaturesRequired={signaturesRequired}
+          />
+        </Route>
+        <Route path="/jbproject">
+          <Jbprojects
+            address={address}
+            localProvider={localProvider}
+            signer={userSigner}
+            readContracts={readContracts}
+            writeContracts={writeContracts}
+            tx={tx}
+            nonce={nonce}
+            poolServerUrl={BACKEND_URL}
+            contractName={contractName}
             signaturesRequired={signaturesRequired}
           />
         </Route>

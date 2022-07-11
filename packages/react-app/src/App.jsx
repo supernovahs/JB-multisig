@@ -638,6 +638,9 @@ function App(props) {
         <Menu.Item key="/pool" disabled={reDeployWallet !== undefined}>
           <Link to="/pool">Pool</Link>
         </Menu.Item>
+        <Menu.Item key="/jbproject">
+          <Link to="/jbproject">JB Project</Link>
+        </Menu.Item>
       </Menu>
     </div>
   );
