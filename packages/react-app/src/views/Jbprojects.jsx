@@ -1,7 +1,7 @@
-import { Button, Input } from "antd";
+import { Button, Input, Card } from "antd";
 import LocaleProvider from "antd/lib/locale-provider";
 import paymentterminalabi from "../helpers/paymentterminalabi.json";
-import { useState } from "react";
+import React, { useState } from "react";
 import { parseEther } from "@ethersproject/units";
 
 const ethers = require("ethers");
@@ -19,6 +19,8 @@ export default function Jbprojects({
   signaturesRequired,
 }) {
   const [amount, setAmount] = useState("0");
+  const [projectId, setProjectId] = useState("");
+
   console.log("address", address);
   const projectid = 4288;
   const payamount = 100000000000000;
@@ -62,12 +64,50 @@ export default function Jbprojects({
     }
   };
 
+  let mockProjects = [1, 2, 3, 4];
+
   return (
     <div>
-      <h1>Jbprojects</h1>
-      <Input placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} />
+      {/* <h1>Jbprojects</h1> */}
+      {/* <Input placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} /> */}
+      {/* <Button onClick={async () => {}}>Pay</Button> */}
+      <div className="flex justify-center items-center flex-col w-full ">
+        {/* input action */}
+        <div className=" my-2">
+          <Input.Group compact>
+            <Input
+              style={{
+                width: "calc(100% - 90px)",
+              }}
+              placeholder="Enter project id"
+              value={projectId}
+              onChange={e => setProjectId(e.target.value)}
+            />
+            <Button type="primary">Submit</Button>
+          </Input.Group>
+        </div>
 
-      <Button onClick={async () => {}}>Pay</Button>
+        {/* project cards */}
+        <div className="flex justify-center flex-wrap ">
+          {mockProjects.map((data, index) => {
+            return (
+              <div className="m-2 " key={index}>
+                <Card title="Project name" className="mx-2 " extra={<a href="#">Pay</a>} style={{ width: 300 }}>
+                  <div className="flex justify-center">
+                    <img
+                      className="w-36"
+                      src="https://jbx.mypinata.cloud/ipfs/QmWXCt1zYAJBkNb7cLXTNRNisuWu9mRAmXTaW9CLFYkWVS"
+                      alt="JuiceboxDAO logo"
+                    ></img>
+                  </div>
+                  <div>Balance Ξ 232</div>
+                  <div>this is demo description</div>
+                </Card>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
