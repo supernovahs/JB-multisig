@@ -43,6 +43,7 @@ import { useLocalStorage, useStaticJsonRPC } from "./hooks";
 const { Option } = Select;
 const { ethers } = require("ethers");
 
+
 /// 📡 What chain are your contracts deployed to?
 const initialNetwork = NETWORKS.rinkeby; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
