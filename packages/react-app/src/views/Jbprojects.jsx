@@ -1,6 +1,6 @@
 import { Button, Input, InputNumber, Card, Modal } from "antd";
 import LocaleProvider from "antd/lib/locale-provider";
-import paymentterminalabi from "../helpers/paymentterminalabi.json";
+import paymentTerminalAbi from "../helpers/paymentterminalabi.json";
 import JBSingleTokenPaymentTerminalStore from "../helpers/JBSingleTokenPaymentTerminalStore.json";
 import JBTokenProject from "../helpers/JBProjects.json";
 import React, { useState } from "react";
@@ -8,10 +8,60 @@ import { parseEther } from "@ethersproject/units";
 import axios from "axios";
 import { useEffect } from "react";
 
+import { AddressInput, EtherInput, Address } from "../components";
+
 const ethers = require("ethers");
-const PayModal = ({ isOpen, setIsOpen }) => {
-  const onPay = () => {
+
+const JB_TERMINAL_ADDRESS = "0x5d4eb71749dd9984118ebdf96aaf3cf6eae1a745";
+const JB_PROJECTS_ADDRESS = "0x2d8e361f8F1B5daF33fDb2C99971b33503E60EEE";
+const JB_PROJECTS_KEY = "JB_PROJECTS";
+
+const PayModal = ({ isOpen, setIsOpen, price, projectId, address, readContracts, contractName, nonce }) => {
+  console.log("projectId: ", projectId);
+  const [payAmount, setPayAmount] = useState(0);
+  const [memo, setMemo] = useState("");
+
+  const onPay = async () => {
     setIsOpen(false);
+
+    // const projectid = 4288;
+    const payamount = 100000000000000;
+    const token = "0x0000000000000000000000000000000000000000";
+    const beneficiary = address;
+    const minimumreturnedtokens = 0;
+    const preferClaimedtokens = true;
+    // const memo = "Buidl";
+    const metadata = "0x00";
+    const ifacepaymentterminal = new ethers.utils.Interface(paymentTerminalAbi);
+    const paymentterminaladdress = "0x765A8b9a23F58Db6c8849315C04ACf32b2D55cF8";
+
+    try {
+      let paymentcalldata;
+      let executeToAddress = paymentterminaladdress;
+      console.log("payAmount: ", payAmount);
+      console.log("ethers.utils.parseEther(payAmount): ", ethers.BigNumber.from(String(payAmount)));
+
+      paymentcalldata = ifacepaymentterminal.encodeFunctionData("pay", [
+        projectId,
+        ethers.utils.parseEther(String(payAmount)), // <---- bignumber conversion issue on floating value work with int values
+        token,
+        beneficiary,
+        minimumreturnedtokens,
+        preferClaimedtokens,
+        memo,
+        metadata,
+      ]);
+      console.log("paymentcalldata", paymentcalldata);
+      const newHash = await readContracts[contractName].getTransactionHash(
+        nonce.toNumber(),
+        executeToAddress,
+        parseEther("" + parseFloat(payAmount).toFixed(12)), // <---- doubt ❓ check the payAmount value added here instead amount
+        paymentcalldata,
+      );
+      // console.log("newHash", newHash);
+    } catch (err) {
+      console.log("error in pay tx", err);
+    }
   };
 
   const onCancle = () => {
@@ -19,10 +69,40 @@ const PayModal = ({ isOpen, setIsOpen }) => {
   };
 
   return (
-    <Modal title="Basic Modal" visible={isOpen} onOk={onPay} onCancel={onCancle}>
-      <p>Some contents...</p>
-      <p>Some contents...</p>
-      <p>Some contents...</p>
+    <Modal
+      title="Basic Modal"
+      visible={isOpen}
+      onOk={onPay}
+      onCancel={onCancle}
+      footer={[
+        <Button key="back" onClick={onCancle}>
+          Return
+        </Button>,
+        <Button
+          key="submit"
+          type="primary"
+          // loading={loading}
+          onClick={onPay}
+        >
+          Pay
+        </Button>,
+      ]}
+    >
+      <div className=" flex flex-col justify-start items--end">
+        <div className="my-1">Project Id # {projectId}</div>
+        <div className="my-1">
+          <EtherInput
+            placeholder="Enter pay amount"
+            price={price}
+            mode="USD"
+            value={payAmount}
+            onChange={setPayAmount}
+          />
+        </div>
+        <div className="my-1">
+          <Input placeholder="Enter memo" value={memo} onChange={e => setMemo(e.target.value)} />
+        </div>
+      </div>
     </Modal>
   );
 };
@@ -38,12 +118,14 @@ export default function Jbprojects({
   poolServerUrl,
   contractName,
   signaturesRequired,
+  price,
 }) {
   const [amount, setAmount] = useState("0");
   const [projectId, setProjectId] = useState("");
   const [projects, setProjects] = useState([]);
   const [projectToggle, setProjectToggle] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [currentProjectId, setCurrentProjectId] = useState("");
 
   const projectid = 4288;
   const payamount = 100000000000000;
@@ -53,12 +135,12 @@ export default function Jbprojects({
   const preferClaimedtokens = true;
   const memo = "Buidl";
   const metadata = "0x00";
-  const ifacepaymentterminal = new ethers.utils.Interface(paymentterminalabi);
+  const ifacepaymentterminal = new ethers.utils.Interface(paymentTerminalAbi);
   const paymentterminaladdress = "0x765A8b9a23F58Db6c8849315C04ACf32b2D55cF8";
 
-  const JB_TERMINAL_ADDRESS = "0x5d4eb71749dd9984118ebdf96aaf3cf6eae1a745";
-  const JB_PROJECTS_ADDRESS = "0x2d8e361f8F1B5daF33fDb2C99971b33503E60EEE";
-  const JB_PROJECTS_KEY = "JB_PROJECTS";
+  // const JB_TERMINAL_ADDRESS = "0x5d4eb71749dd9984118ebdf96aaf3cf6eae1a745";
+  // const JB_PROJECTS_ADDRESS = "0x2d8e361f8F1B5daF33fDb2C99971b33503E60EEE";
+  // const JB_PROJECTS_KEY = "JB_PROJECTS";
 
   useEffect(() => {
     let projectsLocalData = localStorage.getItem(JB_PROJECTS_KEY);
@@ -68,7 +150,7 @@ export default function Jbprojects({
     setProjects(projectsLocalData["data"]);
   }, [projectToggle]);
 
-  const paytransaction = async () => {
+  const payTransaction = async () => {
     try {
       let paymentcalldata;
       let executeToAddress = paymentterminaladdress;
@@ -135,10 +217,11 @@ export default function Jbprojects({
       let projectCID = await JBProject.metadataContentOf(+currentProjectId, 0);
       console.log("projectCID: ", projectCID);
 
-      let response = await axios.get("https://ipfs.io/ipfs/QmQHGuXv7nDh1rxj48HnzFtwvVxwF1KU9AfB6HbfG8fmJF");
+      let response = await axios.get(`https://ipfs.io/ipfs/QmQHGuXv7nDh1rxj48HnzFtwvVxwF1KU9AfB6HbfG8fmJF`);
       let projectData = response.data;
       console.log("projectData: ", projectData);
       projectData["balance"] = ethers.utils.formatEther(projectBalance);
+      projectData["projectId"] = projectId;
 
       // add project to local storage
 
@@ -147,10 +230,12 @@ export default function Jbprojects({
       projectsLocalData = projectsLocalData["data"] ? projectsLocalData["data"] : [];
       localStorage.setItem(JB_PROJECTS_KEY, JSON.stringify({ data: [...projectsLocalData, { ...projectData }] }));
       setProjectToggle(!projectToggle);
+      setProjectId("");
     }
   };
 
   const onOpenModal = projectId => {
+    setCurrentProjectId(projectId);
     setIsOpen(true);
   };
 
@@ -160,7 +245,14 @@ export default function Jbprojects({
       {/* <Input placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} /> */}
       {/* <Button onClick={async () => {}}>Pay</Button> */}
 
-      <PayModal isOpen={isOpen} setIsOpen={setIsOpen} />
+      <PayModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        price={price}
+        projectId={currentProjectId}
+        address={address}
+        nonce={nonce}
+      />
 
       <div className="flex justify-center items-center flex-col w-full ">
         {/* <button onClick={testContract}>test</button> */}
@@ -202,7 +294,7 @@ export default function Jbprojects({
                     title={data.name}
                     className="mx-2 "
                     extra={
-                      <button className="text-blue-600" onClick={onOpenModal}>
+                      <button className="text-blue-600" onClick={() => onOpenModal(data.projectId)}>
                         Pay
                       </button>
                     }

@@ -123,6 +123,7 @@ const Routes = ({
             poolServerUrl={BACKEND_URL}
             contractName={contractName}
             signaturesRequired={signaturesRequired}
+            price={price}
           />
         </Route>
         <Route exact path="/debug">
