@@ -1,6 +1,7 @@
 import { Button, Input, Card } from "antd";
 import LocaleProvider from "antd/lib/locale-provider";
 import paymentterminalabi from "../helpers/paymentterminalabi.json";
+import JBSingleTokenPaymentTerminalStore from "../helpers/JBSingleTokenPaymentTerminalStore.json";
 import React, { useState } from "react";
 import { parseEther } from "@ethersproject/units";
 
@@ -8,7 +9,7 @@ const ethers = require("ethers");
 
 export default function Jbprojects({
   address,
-  LocalProvider,
+  localProvider,
   signer,
   readContracts,
   writeContracts,
@@ -20,6 +21,8 @@ export default function Jbprojects({
 }) {
   const [amount, setAmount] = useState("0");
   const [projectId, setProjectId] = useState("");
+
+  console.log("readContracts: ", readContracts);
 
   console.log("address", address);
   const projectid = 4288;
@@ -66,12 +69,39 @@ export default function Jbprojects({
 
   let mockProjects = [1, 2, 3, 4];
 
+  const testContract = async () => {
+    // console.log(
+    //   'readContracts["JBSingleTokenPaymentTerminalStore"]: ',
+    //   readContracts["JBSingleTokenPaymentTerminalStore"].address,
+    // );
+
+    // let data = await readContracts["JBSingleTokenPaymentTerminalStore"].balanceOf(
+    //   "0x11b9Ee3c57219E5683a354B870B400825EdF6a84",
+    //   4266,
+    // );
+
+    console.log("LocalProvider: ", localProvider);
+    console.log("signer: ", signer.provider);
+
+    let JBToken = new ethers.Contract(
+      "0x765A8b9a23F58Db6c8849315C04ACf32b2D55cF8",
+      JBSingleTokenPaymentTerminalStore,
+      localProvider,
+    );
+
+    console.log("JBToken: ", JBToken.address);
+
+    let data = await JBToken.balanceOf("0x765A8b9a23F58Db6c8849315C04ACf32b2D55cF8", 4266);
+    console.log("data: ", data);
+  };
+
   return (
     <div>
       {/* <h1>Jbprojects</h1> */}
       {/* <Input placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} /> */}
       {/* <Button onClick={async () => {}}>Pay</Button> */}
       <div className="flex justify-center items-center flex-col w-full ">
+        <button onClick={testContract}>test</button>
         {/* input action */}
         <div className=" my-2">
           <Input.Group compact>
