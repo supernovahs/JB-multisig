@@ -84,7 +84,7 @@ export default function Jbprojects({
     console.log("signer: ", signer.provider);
 
     let JBToken = new ethers.Contract(
-      "0x765A8b9a23F58Db6c8849315C04ACf32b2D55cF8",
+      "0x5d4eb71749dd9984118ebdf96aaf3cf6eae1a745",
       JBSingleTokenPaymentTerminalStore,
       localProvider,
     );
