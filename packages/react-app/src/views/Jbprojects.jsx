@@ -90,7 +90,7 @@ const PayModal = ({
           address: readContracts[contractName]?.address,
           nonce: nonce.toNumber(),
           to: executeToAddress,
-          payAmount,
+          amount: payAmount,
           data: paymentcalldata,
           hash: newHash,
           signatures: [signature],

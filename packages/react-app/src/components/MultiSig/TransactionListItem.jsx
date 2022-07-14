@@ -116,6 +116,28 @@ export default function TransactionListItem({
           <>{children}</>
         </>
       );
+    } else if (txnData[item.hash]?.functionFragment?.name === "reconfigureFundingCyclesOf") {
+      return (
+        <>
+          <span style={{ fontSize: 16, fontWeight: "bold" }}>Reconfigure</span>
+
+          <b>For</b>
+          <b>ProjectId:&nbsp; {txnData[item.hash]?.args[0].toNumber()}</b>
+          <>{children}</>
+        </>
+      );
+    } else if (txnData[item.hash]?.functionFragment?.name === "issueTokenFor") {
+      return (
+        <>
+          <span style={{ fontSize: 16, fontWeight: "bold" }}>Issue ERC20 Tokens</span>
+
+          <b>For</b>
+          <b>ProjectId:&nbsp; {txnData[item.hash]?.args[0].toNumber()}</b>
+          <b>Token Name: &nbsp; {txnData[item.hash]?.args[1]}</b>
+          <b>Token Symbol: &nbsp; {txnData[item.hash]?.args[2]}</b>
+          <>{children}</>
+        </>
+      );
     } else if (!txnData[item.hash]?.functionFragment?.name) {
       return (
         <>
@@ -130,8 +152,6 @@ export default function TransactionListItem({
         </>
       );
     } else if (txnData[item.hash]?.signature != "") {
-      //console.log("CALL",txnData)
-
       return (
         <>
           <span style={{ fontSize: 16, fontWeight: "bold" }}>Call</span>
