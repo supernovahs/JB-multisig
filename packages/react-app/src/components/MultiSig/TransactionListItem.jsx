@@ -48,7 +48,17 @@ export default function TransactionListItem({
       }
     }
   }, [item]);
-  console.log("txndata  list item ", txnData);
+  // console.log("txndata  list item ", txnData);
+
+  let functionName = txnData[item.hash]?.functionFragment?.name;
+  let projectId = txnData[item.hash]?.args["_projectId"]?.toString();
+  // console.log("n-projectId: ", projectId);
+
+  const projectCID =
+    functionName === "launchProjectFor" ? (txnData[item.hash]?.args[1] ? txnData[item.hash]?.args[1][0] : "") : "";
+  console.log("n-projectCID: ", projectCID);
+  console.log("n-txnData[item.hash]?.args[1]: ", txnData[item.hash]?.args[1]);
+
   const txDisplay = () => {
     const toSelf = item?.to == readContracts[contractName].address;
 
@@ -112,7 +122,9 @@ export default function TransactionListItem({
             fontSize={16}
           />
 
-          <a href="https://ipfs.io/ipfs/${txnData[item.hash]?.args[1]}">Metadata</a>
+          <a href={`https://ipfs.io/ipfs/${projectCID}`} target="_blank">
+            Metadata
+          </a>
           <>{children}</>
         </>
       );
@@ -211,11 +223,8 @@ export default function TransactionListItem({
   };
 
   console.log("n-item: ", item);
-  console.log("n-txnData[item.hash]: ", txnData[item.hash]);
+  // console.log("n-txnData[item.hash]: ", txnData[item.hash]);
 
-  let functionName = txnData[item.hash]?.functionFragment?.name;
-  let projectId = txnData[item.hash]?.args["_projectId"].toString();
-  console.log("n-projectId: ", projectId);
   return (
     <>
       <TransactionDetailsModal
