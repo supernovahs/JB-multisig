@@ -105,7 +105,9 @@ function App(props) {
   // let BACKEND_URL = "https://multisig-lol-backend.herokuapp.com/";
   if (targetNetwork && targetNetwork.name && targetNetwork.name != "localhost") {
     // BACKEND_URL = "https://backend.multisig.lol:49899/";
-    BACKEND_URL = "https://multisig-lol-backend.herokuapp.com/"; // naim heroku backend
+    // BACKEND_URL = "https://multisig-lol-backend.herokuapp.com/"; // naim heroku backend
+
+    BACKEND_URL = "http://localhost:49899/";
   }
 
   if (!targetNetwork) targetNetwork = NETWORKS["localhost"];

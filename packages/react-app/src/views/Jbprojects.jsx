@@ -32,6 +32,7 @@ const PayModal = ({
   poolServerUrl,
 }) => {
   const history = useHistory();
+  console.log("poolServerUrl: ", poolServerUrl);
 
   const [payAmount, setPayAmount] = useState(0);
   const [memo, setMemo] = useState("");
@@ -165,7 +166,7 @@ export default function Jbprojects({
   signaturesRequired,
   price,
 }) {
-  console.log("n-readcontracts JB", readContracts);
+  // console.log("n-readcontracts JB", readContracts);
   // console.log("n-localprovider", localProvider);
 
   const [amount, setAmount] = useState("0");
@@ -192,9 +193,9 @@ export default function Jbprojects({
 
   useEffect(() => {
     let projectsLocalData = localStorage.getItem(JB_PROJECTS_KEY);
-    console.log("n-projectsLocalData: ", projectsLocalData);
+    // console.log("n-projectsLocalData: ", projectsLocalData);
     projectsLocalData = projectsLocalData != null ? JSON.parse(projectsLocalData) : [];
-    console.log("n-projectsLocalData: ", projectsLocalData);
+    // console.log("n-projectsLocalData: ", projectsLocalData);
     setProjects(projectsLocalData["data"]);
   }, [projectToggle]);
 
@@ -263,7 +264,8 @@ export default function Jbprojects({
       let projectCID = await JBProject.metadataContentOf(+currentProjectId, 0);
       console.log("projectCID: ", projectCID);
 
-      let response = await axios.get(`https://ipfs.io/ipfs/QmQHGuXv7nDh1rxj48HnzFtwvVxwF1KU9AfB6HbfG8fmJF`);
+      // let response = await axios.get(`https://ipfs.io/ipfs/QmQHGuXv7nDh1rxj48HnzFtwvVxwF1KU9AfB6HbfG8fmJF`);
+      let response = await axios.get(`https://ipfs.io/ipfs/${projectCID}`);
       let projectData = response.data;
       console.log("projectData: ", projectData);
       projectData["balance"] = ethers.utils.formatEther(projectBalance);
@@ -354,7 +356,11 @@ export default function Jbprojects({
                       <img
                         className="w-36"
                         // src="https://jbx.mypinata.cloud/ipfs/QmWXCt1zYAJBkNb7cLXTNRNisuWu9mRAmXTaW9CLFYkWVS"
-                        src={data.logoUri}
+                        src={
+                          data.logoUri
+                            ? data.logoUri
+                            : "https://jbx.mypinata.cloud/ipfs/QmWXCt1zYAJBkNb7cLXTNRNisuWu9mRAmXTaW9CLFYkWVS"
+                        }
                         alt="JuiceboxDAO logo"
                       ></img>
                     </div>

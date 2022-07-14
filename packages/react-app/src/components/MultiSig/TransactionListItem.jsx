@@ -210,6 +210,12 @@ export default function TransactionListItem({
     }
   };
 
+  console.log("n-item: ", item);
+  console.log("n-txnData[item.hash]: ", txnData[item.hash]);
+
+  let functionName = txnData[item.hash]?.functionFragment?.name;
+  let projectId = txnData[item.hash]?.args["_projectId"].toString();
+  console.log("n-projectId: ", projectId);
   return (
     <>
       <TransactionDetailsModal
@@ -224,9 +230,17 @@ export default function TransactionListItem({
         // <List.Item key={item.hash} style={{ position: "relative", display: "flex", flexWrap: "wrap", width: 800 }}>
         <List.Item style={{ border: 0 }} key={item.hash} className="b--red m-5 ">
           <>
-            <a href={blockExplorer + "tx/" + item.hash} target="_blank">
-              <b style={{ padding: 16 }}>#{typeof item.nonce === "number" ? item.nonce : item.nonce.toNumber()}</b>
-            </a>
+            {functionName !== "pay" && (
+              <a href={blockExplorer + "tx/" + item.hash} target="_blank" rel="noreferrer">
+                <b style={{ padding: 16 }}>#{typeof item.nonce === "number" ? item.nonce : item.nonce.toNumber()}</b>
+              </a>
+            )}
+
+            {functionName === "pay" && (
+              <a href={`https://rinkeby.juicebox.money/#/v2/p/${projectId}`} target="_blank" rel="noreferrer">
+                <b style={{ padding: 16 }}>#{typeof item.nonce === "number" ? item.nonce : item.nonce.toNumber()}</b>
+              </a>
+            )}
             {txDisplay()}
             <Blockie size={4} scale={8} address={item.hash} />
           </>
