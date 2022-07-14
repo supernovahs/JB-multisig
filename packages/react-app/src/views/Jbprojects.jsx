@@ -296,7 +296,7 @@ export default function Jbprojects({
           projectId={currentProjectId}
           address={address}
           nonce={nonce}
-          userSigner={{ ...userSigner }}
+          userSigner={userSigner}
           poolServerUrl={poolServerUrl}
           contractName={contractName}
           readContracts={{ ...readContracts }}
