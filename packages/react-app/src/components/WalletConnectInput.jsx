@@ -28,11 +28,15 @@ const WalletConnectInput = ({ chainId, address, loadWalletConnectData, mainnetPr
     }
   }, [walletConnectUri]);
 
-  useEffect(() => {
-    if (address && !isConnected) {
-      resetConnection();
-    }
-  }, [address], isConnected);
+  useEffect(
+    () => {
+      if (address && !isConnected) {
+        resetConnection();
+      }
+    },
+    [address],
+    isConnected,
+  );
 
   const setupAndSubscribe = () => {
     const connector = setupConnector();
@@ -47,7 +51,7 @@ const WalletConnectInput = ({ chainId, address, loadWalletConnectData, mainnetPr
     let connector;
     try {
       connector = new WalletConnect({ uri: walletConnectUri });
-     // return connector;
+      // return connector;
     } catch (error) {
       console.error("setupConnector error:", error);
       localStorage.removeItem("walletConnectUri");

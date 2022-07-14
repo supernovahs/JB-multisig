@@ -6,6 +6,8 @@ import JBTokenProject from "../helpers/JBProjects.json";
 import React, { useState } from "react";
 import { parseEther } from "@ethersproject/units";
 import axios from "axios";
+import { useHistory } from "react-router-dom";
+
 import { useEffect } from "react";
 
 import { AddressInput, EtherInput, Address } from "../components";
@@ -16,34 +18,48 @@ const JB_TERMINAL_ADDRESS = "0x5d4eb71749dd9984118ebdf96aaf3cf6eae1a745";
 const JB_PROJECTS_ADDRESS = "0x2d8e361f8F1B5daF33fDb2C99971b33503E60EEE";
 const JB_PROJECTS_KEY = "JB_PROJECTS";
 
-const PayModal = ({ isOpen, setIsOpen, price, projectId, address, readContracts, contractName, nonce }) => {
+const PayModal = ({
+  isOpen,
+  setIsOpen,
+  price,
+  projectId,
+  address,
+  readContracts,
+  contractName,
+  nonce,
+  localProvider,
+  userSigner,
+  poolServerUrl,
+}) => {
+  const history = useHistory();
+
   console.log("projectId: ", projectId);
+  console.log("readContracts: ", readContracts);
+  console.log("localprovider", localProvider);
   const [payAmount, setPayAmount] = useState(0);
   const [memo, setMemo] = useState("");
 
   const onPay = async () => {
     setIsOpen(false);
 
-    // const projectid = 4288;
-    const payamount = 100000000000000;
+    // // const projectid = 4288;
+    // const payamount = 100000000000000;
     const token = "0x0000000000000000000000000000000000000000";
     const beneficiary = address;
     const minimumreturnedtokens = 0;
     const preferClaimedtokens = true;
     // const memo = "Buidl";
     const metadata = "0x00";
-    const ifacepaymentterminal = new ethers.utils.Interface(paymentTerminalAbi);
     const paymentterminaladdress = "0x765A8b9a23F58Db6c8849315C04ACf32b2D55cF8";
+    const ifacepaymentterminal = new ethers.utils.Interface(paymentTerminalAbi);
 
     try {
       let paymentcalldata;
       let executeToAddress = paymentterminaladdress;
-      console.log("payAmount: ", payAmount);
-      console.log("ethers.utils.parseEther(payAmount): ", ethers.BigNumber.from(String(payAmount)));
-
+      // console.log("payAmount: ", ethers.utils.parseEther(payAmount).toString());
       paymentcalldata = ifacepaymentterminal.encodeFunctionData("pay", [
         projectId,
-        ethers.utils.parseEther(String(payAmount)), // <---- bignumber conversion issue on floating value work with int values
+        (payAmount * 10 ** 18).toString(),
         token,
         beneficiary,
         minimumreturnedtokens,
@@ -52,13 +68,45 @@ const PayModal = ({ isOpen, setIsOpen, price, projectId, address, readContracts,
         metadata,
       ]);
       console.log("paymentcalldata", paymentcalldata);
-      const newHash = await readContracts[contractName].getTransactionHash(
+      console.log("nonce", nonce.toNumber());
+      console.log("executeToAddress", executeToAddress);
+      const newHash = await readContracts.MultiSigWallet.getTransactionHash(
         nonce.toNumber(),
         executeToAddress,
-        parseEther("" + parseFloat(payAmount).toFixed(12)), // <---- doubt ❓ check the payAmount value added here instead amount
+        parseEther("" + parseFloat(payAmount).toFixed(12)),
         paymentcalldata,
       );
-      // console.log("newHash", newHash);
+      console.log("newHash", newHash);
+
+      const signature = await userSigner?.signMessage(ethers.utils.arrayify(newHash));
+      console.log("signature: ", signature);
+
+      const recover = await readContracts[contractName].recover(newHash, signature);
+      console.log("recover: ", recover);
+
+      const isOwner = await readContracts[contractName].isOwner(recover);
+      console.log("isOwner: ", isOwner);
+
+      if (isOwner) {
+        const res = await axios.post(poolServerUrl, {
+          chainId: localProvider._network.chainId,
+          address: readContracts[contractName]?.address,
+          nonce: nonce.toNumber(),
+          to: executeToAddress,
+          payAmount,
+          data: paymentcalldata,
+          hash: newHash,
+          signatures: [signature],
+          signers: [recover],
+        });
+
+        console.log("RESULT", res.data);
+        setTimeout(() => {
+          history.push("/pool");
+        }, 1000);
+      } else {
+        console.log("ERROR, NOT OWNER.");
+      }
     } catch (err) {
       console.log("error in pay tx", err);
     }
@@ -110,7 +158,7 @@ const PayModal = ({ isOpen, setIsOpen, price, projectId, address, readContracts,
 export default function Jbprojects({
   address,
   localProvider,
-  signer,
+  userSigner,
   readContracts,
   writeContracts,
   tx,
@@ -120,6 +168,8 @@ export default function Jbprojects({
   signaturesRequired,
   price,
 }) {
+  console.log("readcontracts", readContracts);
+  console.log("localprovider", localProvider);
   const [amount, setAmount] = useState("0");
   const [projectId, setProjectId] = useState("");
   const [projects, setProjects] = useState([]);
@@ -127,16 +177,16 @@ export default function Jbprojects({
   const [isOpen, setIsOpen] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState("");
 
-  const projectid = 4288;
-  const payamount = 100000000000000;
-  const token = "0x0000000000000000000000000000000000000000";
-  const beneficiary = address;
-  const minimumreturnedtokens = 0;
-  const preferClaimedtokens = true;
-  const memo = "Buidl";
-  const metadata = "0x00";
-  const ifacepaymentterminal = new ethers.utils.Interface(paymentTerminalAbi);
-  const paymentterminaladdress = "0x765A8b9a23F58Db6c8849315C04ACf32b2D55cF8";
+  // const projectid = 4288;
+  // // const payamount = 100000000000000;
+  // const token = "0x0000000000000000000000000000000000000000";
+  // const beneficiary = address;
+  // const minimumreturnedtokens = 0;
+  // const preferClaimedtokens = true;
+  // const memo = "Buidl";
+  // const metadata = "0x00";
+  // const ifacepaymentterminal = new ethers.utils.Interface(paymentTerminalAbi);
+  // const paymentterminaladdress = "0x765A8b9a23F58Db6c8849315C04ACf32b2D55cF8";
 
   // const JB_TERMINAL_ADDRESS = "0x5d4eb71749dd9984118ebdf96aaf3cf6eae1a745";
   // const JB_PROJECTS_ADDRESS = "0x2d8e361f8F1B5daF33fDb2C99971b33503E60EEE";
@@ -150,38 +200,36 @@ export default function Jbprojects({
     setProjects(projectsLocalData["data"]);
   }, [projectToggle]);
 
-  const payTransaction = async () => {
-    try {
-      let paymentcalldata;
-      let executeToAddress = paymentterminaladdress;
+  // const payTransaction = async () => {
+  //   try {
+  //     let paymentcalldata;
+  //     let executeToAddress = paymentterminaladdress;
 
-      paymentcalldata = ifacepaymentterminal.encodeFunctionData("pay", [
-        projectid,
-        payamount,
-        token,
-        beneficiary,
-        minimumreturnedtokens,
-        preferClaimedtokens,
-        memo,
-        metadata,
-      ]);
-      console.log("paymentcalldata", paymentcalldata);
+  //     paymentcalldata = ifacepaymentterminal.encodeFunctionData("pay", [
+  //       projectid,
+  //       payamount,
+  //       token,
+  //       beneficiary,
+  //       minimumreturnedtokens,
+  //       preferClaimedtokens,
+  //       memo,
+  //       metadata,
+  //     ]);
+  //     console.log("paymentcalldata", paymentcalldata);
 
-      const newHash = await readContracts[contractName].getTransactionHash(
-        nonce.toNumber(),
-        executeToAddress,
-        parseEther("" + parseFloat(amount).toFixed(12)),
-        paymentcalldata,
-      );
-      console.log("newHash", newHash);
+  //     const newHash = await readContracts[contractName].getTransactionHash(
+  //       nonce.toNumber(),
+  //       executeToAddress,
+  //       parseEther("" + parseFloat(amount).toFixed(12)),
+  //       paymentcalldata,
+  //     );
+  //     console.log("newHash", newHash);
 
-      // const signature =
-    } catch (err) {
-      console.log("error in pay tx", err);
-    }
-  };
-
-  let mockProjects = [1, 2, 3, 4];
+  //     // const signature =
+  //   } catch (err) {
+  //     console.log("error in pay tx", err);
+  //   }
+  // };
 
   // const testContract = async () => {
   //   try {
@@ -241,10 +289,6 @@ export default function Jbprojects({
 
   return (
     <div>
-      {/* <h1>Jbprojects</h1> */}
-      {/* <Input placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} /> */}
-      {/* <Button onClick={async () => {}}>Pay</Button> */}
-
       <PayModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
@@ -252,6 +296,10 @@ export default function Jbprojects({
         projectId={currentProjectId}
         address={address}
         nonce={nonce}
+        userSigner={userSigner}
+        poolServerUrl={poolServerUrl}
+        readContract={readContracts}
+        contractName={contractName}
       />
 
       <div className="flex justify-center items-center flex-col w-full ">

@@ -4,16 +4,10 @@ const axios = require("axios");
 
 export default async function parseExternalContractTransaction(contractAddress, txData) {
 
-  console.log("PARSE",contractAddress, txData)
+  console.log("PARSE", contractAddress, txData)
   try {
-    let response = await axios.get('https://api.etherscan.io/api', {
-      params: {
-        module: 'contract',
-        action: 'getabi',
-        address: contractAddress,
-        apikey: "PJPKDC3BEBJQJVDEPCU5KAIA7WIV8IWQ51",
-      }
-    })
+    let response = await axios.get('https://api-rinkeby.etherscan.io/api?module=contract&action=getabi&address=' + contractAddress + '&apikey=NS4S9UP9T8TDMPVI9H9RWH572AKWQPI4UN')
+    console.log("response", response);
 
     const getParsedTransaction = async () => {
       const abi = response?.data?.result;
@@ -23,7 +17,7 @@ export default async function parseExternalContractTransaction(contractAddress, 
       }
     }
 
-    return await getParsedTransaction(response);
+    return await getParsedTransaction();
   } catch (error) {
     console.log("parseExternalContractTransaction error:", error);
   }
