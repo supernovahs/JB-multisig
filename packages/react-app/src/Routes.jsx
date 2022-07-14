@@ -115,7 +115,7 @@ const Routes = ({
           <Jbprojects
             address={address}
             localProvider={localProvider}
-            signer={userSigner}
+            userSigner={userSigner}
             readContracts={readContracts}
             writeContracts={writeContracts}
             tx={tx}

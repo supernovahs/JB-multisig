@@ -48,7 +48,7 @@ export default function TransactionListItem({
       }
     }
   }, [item]);
-
+  console.log("txndata  list item ", txnData);
   const txDisplay = () => {
     const toSelf = item?.to == readContracts[contractName].address;
 
@@ -84,10 +84,42 @@ export default function TransactionListItem({
           <>{children}</>
         </>
       );
+    } else if (txnData[item.hash]?.functionFragment?.name === "pay") {
+      return (
+        <>
+          <span style={{ fontSize: 16, fontWeight: "bold" }}>Pay</span>
+          <Balance
+            balance={item.value ? item.value : parseEther("" + parseFloat(item.amount).toFixed(12))}
+            dollarMultiplier={price}
+          />
+          to
+          <b>ProjectId:&nbsp; {txnData[item.hash]?.args[0].toNumber()}</b>
+          {/* <Address address={item.to} ensProvider={mainnetProvider} blockExplorer={blockExplorer} fontSize={16} /> */}
+          <>{children}</>
+        </>
+      );
+    } else if (txnData[item.hash]?.functionFragment?.name === "launchProjectFor") {
+      return (
+        <>
+          <span style={{ fontSize: 16, fontWeight: "bold" }}>Register New Project</span>
+
+          <b>Owner:</b>
+          {/* <b>ProjectId:&nbsp; {txnData[item.hash]?.args[0].toNumber()}</b> */}
+          <Address
+            address={txnData[item.hash]?.args[0]}
+            ensProvider={mainnetProvider}
+            blockExplorer={blockExplorer}
+            fontSize={16}
+          />
+
+          <a href="https://ipfs.io/ipfs/${txnData[item.hash]?.args[1]}">Metadata</a>
+          <>{children}</>
+        </>
+      );
     } else if (!txnData[item.hash]?.functionFragment?.name) {
       return (
         <>
-          <span style={{ fontSize: 16, fontWeight: "bold" }}>Transfer</span>
+          <span style={{ fontSize: 16, fontWeight: "bold" }}>Transfer </span>
           <Balance
             balance={item.value ? item.value : parseEther("" + parseFloat(item.amount).toFixed(12))}
             dollarMultiplier={price}
@@ -104,7 +136,6 @@ export default function TransactionListItem({
         <>
           <span style={{ fontSize: 16, fontWeight: "bold" }}>Call</span>
           <span style={{ fontSize: 16 }}>
-            {txnData[item.hash]?.signature}
             <Button style={{ margin: 4 }} disabled={!txnData[item.hash]} onClick={showModal}>
               <EllipsisOutlined />
             </Button>
