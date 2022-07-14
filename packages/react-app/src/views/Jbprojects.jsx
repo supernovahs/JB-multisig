@@ -31,11 +31,13 @@ const PayModal = ({
   userSigner,
   poolServerUrl,
 }) => {
+  console.log("n-projectId: ", projectId);
+
+  console.log("n-readContracts: pay ", readContracts);
+  console.log("n-localprovider pay", localProvider);
+
   const history = useHistory();
 
-  console.log("projectId: ", projectId);
-  console.log("readContracts: ", readContracts);
-  console.log("localprovider", localProvider);
   const [payAmount, setPayAmount] = useState(0);
   const [memo, setMemo] = useState("");
 
@@ -120,10 +122,10 @@ const PayModal = ({
     <Modal
       title="Basic Modal"
       visible={isOpen}
-      onOk={onPay}
-      onCancel={onCancle}
+      onOk={onPay.bind(this)}
+      onCancel={onCancle.bind(this)}
       footer={[
-        <Button key="back" onClick={onCancle}>
+        <Button key="back" onClick={onCancle.bind(this)}>
           Return
         </Button>,
         <Button
@@ -168,8 +170,9 @@ export default function Jbprojects({
   signaturesRequired,
   price,
 }) {
-  console.log("readcontracts", readContracts);
-  console.log("localprovider", localProvider);
+  console.log("n-readcontracts JB", readContracts);
+  // console.log("n-localprovider", localProvider);
+
   const [amount, setAmount] = useState("0");
   const [projectId, setProjectId] = useState("");
   const [projects, setProjects] = useState([]);
@@ -287,21 +290,23 @@ export default function Jbprojects({
     setIsOpen(true);
   };
 
+  console.log("nonce: ", nonce);
   return (
     <div>
       <PayModal
+        key={String(isOpen)}
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         price={price}
         projectId={currentProjectId}
         address={address}
         nonce={nonce}
-        userSigner={userSigner}
+        userSigner={{ ...userSigner }}
         poolServerUrl={poolServerUrl}
-        readContract={readContracts}
         contractName={contractName}
+        readContracts={{ ...readContracts }}
+        localProvider={{ ...localProvider }}
       />
-
       <div className="flex justify-center items-center flex-col w-full ">
         {/* <button onClick={testContract}>test</button> */}
         {/* input action */}
