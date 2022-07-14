@@ -31,11 +31,6 @@ const PayModal = ({
   userSigner,
   poolServerUrl,
 }) => {
-  console.log("n-projectId: ", projectId);
-
-  console.log("n-readContracts: pay ", readContracts);
-  console.log("n-localprovider pay", localProvider);
-
   const history = useHistory();
 
   const [payAmount, setPayAmount] = useState(0);
@@ -290,23 +285,25 @@ export default function Jbprojects({
     setIsOpen(true);
   };
 
-  console.log("nonce: ", nonce);
   return (
     <div>
-      <PayModal
-        key={String(isOpen)}
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        price={price}
-        projectId={currentProjectId}
-        address={address}
-        nonce={nonce}
-        userSigner={{ ...userSigner }}
-        poolServerUrl={poolServerUrl}
-        contractName={contractName}
-        readContracts={{ ...readContracts }}
-        localProvider={{ ...localProvider }}
-      />
+      {isOpen && (
+        <PayModal
+          key={String(isOpen)}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          price={price}
+          projectId={currentProjectId}
+          address={address}
+          nonce={nonce}
+          userSigner={{ ...userSigner }}
+          poolServerUrl={poolServerUrl}
+          contractName={contractName}
+          readContracts={{ ...readContracts }}
+          localProvider={{ ...localProvider }}
+        />
+      )}
+
       <div className="flex justify-center items-center flex-col w-full ">
         {/* <button onClick={testContract}>test</button> */}
         {/* input action */}
